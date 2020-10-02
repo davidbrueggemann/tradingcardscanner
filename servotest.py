@@ -55,7 +55,7 @@ while True:
 
 	### UPLOAD TO AWS ###
 	isUploaded=awsupload.upload_file(picFileName)
-	print("Upload to AWS successful.") if isUploaded else print("Upload to AWS failed!")
+	print "Upload to AWS successful." if isUploaded else print "Upload to AWS failed!"
 
 	### CARD STOPPER SERVO ####
 	print "Little Servo open (90degrees to the side)"
