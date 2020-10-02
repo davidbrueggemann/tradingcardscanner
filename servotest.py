@@ -6,14 +6,23 @@ import time
 import sys
 import awsupload # own file
 
-####### SETUP ##########
-def camera_setup(camera):
-	camera.color_effects = (128,128)
-	camera.rotation = 0
-	camera.resolution = (300,100)
-
+####### CONSTANTS ########
 servoPin=18
 miniServoPin=24
+
+resolutionW=1024
+resolutionH=768
+
+cropX=220 
+cropY=210 
+cropResultWidth=520 
+cropResultHeight=130
+
+####### SETUP ##########
+def camera_setup(camera):
+	camera.color_effects = (128,128) # grey shades
+	camera.rotation = 180
+	camera.resolution = (resolutionW, resolutionH)
 
 def setup():
 	GPIO.setwarnings(False)
@@ -47,15 +56,21 @@ while True:
 	time.sleep(1)
 
 	### CAMERA ###
+	print "Take a picture"
 	timestamp=time.strftime("%Y%m%d%H%M%S")
 	picFileName="testfoto"+"_"+timestamp+".jpg"
 	camera.capture(picFileName)
-	time.sleep(1)
 	print "Picture Taken!" # See {0}_{1}.jpg!".format(set_name,timestamp)
+
+	### PIC CROP ###
+	print "Crop the picture to the needed data"
+	pic = Image.open(picFileName)
+	pic.crop((cropX, cropY, cropX+cropResultWidth, cropY+cropResultHeight)).save(picFileName)
+	time.sleep(1)
 
 	### UPLOAD TO AWS ###
 	isUploaded=awsupload.upload_file(picFileName)
-	print "Upload to AWS successful." if isUploaded else print "Upload to AWS failed!"
+	print("Upload to AWS successful." if isUploaded else "Upload to AWS failed!")
 
 	### CARD STOPPER SERVO ####
 	print "Little Servo open (90degrees to the side)"
