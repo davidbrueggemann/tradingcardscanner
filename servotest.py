@@ -75,8 +75,10 @@ while True:
 
 	### TEXT DETECTION ON AWS ###
 	detectedText=awsdetecttext.detect_text(picFileName)
-	print "Scanned Card: "+detect_text
-	
+	print ()
+	print "Scanned Card: " + detectedText
+	print () # get a bit space because this is important
+
 	### CARD STOPPER SERVO ####
 	print "Little Servo open (90degrees to the side)"
 	miniServo.ChangeDutyCycle(7.5)
