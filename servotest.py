@@ -5,6 +5,7 @@ import RPi.GPIO as GPIO
 import time
 import sys
 import awsupload # own file
+import awsdetecttext # own file
 
 ####### CONSTANTS ########
 servoPin=18
@@ -72,6 +73,10 @@ while True:
 	isUploaded=awsupload.upload_file(picFileName)
 	print("Upload to AWS successful." if isUploaded else "Upload to AWS failed!")
 
+	### TEXT DETECTION ON AWS ###
+	detectedText=awsdetecttext.detect_text(picFileName)
+	print "Scanned Card: "+detect_text
+	
 	### CARD STOPPER SERVO ####
 	print "Little Servo open (90degrees to the side)"
 	miniServo.ChangeDutyCycle(7.5)
