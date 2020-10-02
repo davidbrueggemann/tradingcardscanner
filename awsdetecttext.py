@@ -2,7 +2,7 @@ import boto3
 
 def detect_text(photo, bucket="rasppicardscanner"):
 
-    client=boto3.client('rekognition')
+    client=boto3.client('rekognition', region_name='eu-west-1')
 
     response=client.detect_text(Image={'S3Object':{'Bucket':bucket,'Name':photo}})
     textCat=""            
