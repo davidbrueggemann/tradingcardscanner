@@ -8,8 +8,9 @@ import awsupload # own file
 import awsdetecttext # own file
 
 ####### CONSTANTS ########
-servoPin=18
-miniServoPin=24
+leftCardMovementServoPin=18
+rightCardMovementServoPin=2
+cardStopperServoPin=24
 
 resolutionW=1024
 resolutionH=768
@@ -28,8 +29,9 @@ def camera_setup(camera):
 def setup():
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
-	GPIO.setup(servoPin,GPIO.OUT)
-	GPIO.setup(miniServoPin,GPIO.OUT)
+	GPIO.setup(leftCardMovementServoPin,GPIO.OUT)
+	GPIO.setup(rightCardMovementServoPin,GPIO.OUT)
+	GPIO.setup(cardStopperServoPin,GPIO.OUT)
 
 print "Setup "
 setup()
@@ -38,21 +40,24 @@ camera_setup(camera)
 
 ####### START ##########
 print "initial Servos on PINs with 50 hz"
-servo=GPIO.PWM(servoPin,50)
-miniServo=GPIO.PWM(miniServoPin,50)
-miniServo.start(2.5)
+leftCardMovementServo=GPIO.PWM(leftCardMovementServoPin,50)
+rightCardMovementServo=GPIO.PWM(rightCardMovementServoPin,50)
+cardStopperServo=GPIO.PWM(cardStopperServoPin,50)
+cardStopperServo.start(2.5)
 time.sleep(1)
 
 ####### PROCESS LOOP ##########
 print "Going into loop"
 while True:
-	### CARD MOVEMENT SERVO ####
-	print "Wheel Servo left start"
-	servo.start(15)
+	### CARD MOVEMENT leftCardMovementServo ####
+	print "Wheel CardMovementServos start"
+	leftCardMovementServo.start(15)
+	rightCardMovementServo.start(15)
 	print "Waiting for 1 sec"
 	time.sleep(1)
-	print "Wheel Servo left stop"
-	servo.stop()
+	print "Wheel CardMovementServo stop"
+	leftCardMovementServo.stop()
+	rightCardMovementServo.stop()
 	print "Waiting for 1 sec"
 	time.sleep(1)
 
@@ -79,13 +84,13 @@ while True:
 	print "Scanned Card: " + detectedText
 	print () # get a bit space because this is important
 
-	### CARD STOPPER SERVO ####
-	print "Little Servo open (90degrees to the side)"
-	miniServo.ChangeDutyCycle(7.5)
+	### CARD STOPPER leftCardMovementServo ####
+	print "Little leftCardMovementServo open (90degrees to the side)"
+	cardStopperServo.ChangeDutyCycle(7.5)
 	print "Waiting for 1 sec"
 	time.sleep(1)
-	print "Little Servo close (pin upwards)"
-	miniServo.ChangeDutyCycle(2.5)
+	print "Little leftCardMovementServo close (pin upwards)"
+	cardStopperServo.ChangeDutyCycle(2.5)
 	print "Waiting for 1 sec"
 	time.sleep(1)
 
