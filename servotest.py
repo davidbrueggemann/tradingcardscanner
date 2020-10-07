@@ -52,9 +52,9 @@ while True:
 	### CARD MOVEMENT leftCardMovementServo ####
 	print "Wheel CardMovementServos start"
 	leftCardMovementServo.start(15)
-	rightCardMovementServo.start(15)
+	rightCardMovementServo.start(5)
 	print "Waiting for 1 sec"
-	time.sleep(1)
+	time.sleep(0.5)
 	print "Wheel CardMovementServo stop"
 	leftCardMovementServo.stop()
 	rightCardMovementServo.stop()
