@@ -6,26 +6,14 @@ import time
 import sys
 import awsupload # own file
 import awsdetecttext # own file
+import picture # own file
 
 ####### CONSTANTS ########
 leftCardMovementServoPin=18
 rightCardMovementServoPin=2
 cardStopperServoPin=24
 
-resolutionW=1024
-resolutionH=768
-
-cropX=220 
-cropY=210 
-cropResultWidth=520 
-cropResultHeight=130
-
 ####### SETUP ##########
-def camera_setup(camera):
-	camera.color_effects = (128,128) # grey shades
-	camera.rotation = 180
-	camera.resolution = (resolutionW, resolutionH)
-
 def setup():
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
@@ -35,8 +23,6 @@ def setup():
 
 print "Setup "
 setup()
-camera = PiCamera()
-camera_setup(camera)
 
 ####### START ##########
 print "initial Servos on PINs with 50 hz"
@@ -61,17 +47,9 @@ while True:
 	print "Waiting for 1 sec"
 	time.sleep(1)
 
-	### CAMERA ###
-	print "Take a picture"
-	timestamp=time.strftime("%Y%m%d%H%M%S")
-	picFileName="testfoto"+"_"+timestamp+".jpg"
-	camera.capture(picFileName)
-	print "Picture Taken!" # See {0}_{1}.jpg!".format(set_name,timestamp)
-
-	### PIC CROP ###
-	print "Crop the picture to the needed data"
-	pic = Image.open(picFileName)
-	pic.crop((cropX, cropY, cropX+cropResultWidth, cropY+cropResultHeight)).save(picFileName)
+	# PICTURE
+	filename=take_picture()
+	crop_picture(filename)
 	time.sleep(1)
 
 	### UPLOAD TO AWS ###
