@@ -1,4 +1,4 @@
-####### IMPORTS ##########
+######## IMPORTS ##########
 from PIL import Image
 from picamera import PiCamera
 import RPi.GPIO as GPIO
@@ -14,23 +14,25 @@ rightCardMovementServoPin=2
 cardStopperServoPin=24
 
 ####### SETUP ##########
+
 def setup():
-	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
+	GPIO.setwarnings(False)
 	GPIO.setup(leftCardMovementServoPin,GPIO.OUT)
 	GPIO.setup(rightCardMovementServoPin,GPIO.OUT)
+	print "initial Servos on PINs with 50 hz"
 	GPIO.setup(cardStopperServoPin,GPIO.OUT)
 
 print "Setup "
 setup()
 
-####### START ##########
-print "initial Servos on PINs with 50 hz"
+cardStopperServo=GPIO.PWM(cardStopperServoPin,50)
 leftCardMovementServo=GPIO.PWM(leftCardMovementServoPin,50)
 rightCardMovementServo=GPIO.PWM(rightCardMovementServoPin,50)
-cardStopperServo=GPIO.PWM(cardStopperServoPin,50)
+
+####### START ##########
 cardStopperServo.start(2.5)
-time.sleep(1)
+time.sleep(0.5)
 
 ####### PROCESS LOOP ##########
 print "Going into loop"
@@ -39,25 +41,27 @@ while True:
 	print "Wheel CardMovementServos start"
 	leftCardMovementServo.start(15)
 	rightCardMovementServo.start(5)
-	print "Waiting for 1 sec"
-	time.sleep(0.5)
+	print "spinning Wheel for 0.55 sec"
+	time.sleep(0.55)
 	print "Wheel CardMovementServo stop"
-	leftCardMovementServo.stop()
-	rightCardMovementServo.stop()
-	print "Waiting for 1 sec"
-	time.sleep(1)
+	leftCardMovementServo.start(0)
+	rightCardMovementServo.start(0)
+	print "Waiting for 0.5 sec"
+	time.sleep(0.5)
 
 	# PICTURE
-	filename=take_picture()
-	crop_picture(filename)
+	picfilename=picture.take()
+	picture.crop(picfilename)
 	time.sleep(1)
 
 	### UPLOAD TO AWS ###
-	isUploaded=awsupload.upload_file(picFileName)
+	print "Uploading to AWS"
+	isUploaded=awsupload.upload_file(picfilename)
 	print("Upload to AWS successful." if isUploaded else "Upload to AWS failed!")
 
 	### TEXT DETECTION ON AWS ###
-	detectedText=awsdetecttext.detect_text(picFileName)
+	print "Detecting text by uploaded picture"
+	detectedText=awsdetecttext.detect_text(picfilename)
 	print ()
 	print "Scanned Card: " + detectedText
 	print () # get a bit space because this is important

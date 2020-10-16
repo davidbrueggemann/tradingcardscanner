@@ -22,7 +22,7 @@ def camera_setup(camera):
 camera = PiCamera()
 camera_setup(camera)
 
-def take_picture():
+def take():
 	### CAMERA ###
 	print "Take a picture"
 	timestamp=time.strftime("%Y%m%d%H%M%S")
@@ -31,8 +31,8 @@ def take_picture():
 	print "Picture Taken!" # See {0}_{1}.jpg!".format(set_name,timestamp)
 	return picFileName
 
-def crop_picture(pictureFileName):
+def crop(pictureFileName):
 	### PIC CROP ###
 	print "Crop the picture to the needed data"
 	pic = Image.open(pictureFileName)
-	pic.crop((cropX, cropY, cropX+cropResultWidth, cropY+cropResultHeight)).save(picFileName)
+	pic.crop((cropX, cropY, cropX+cropResultWidth, cropY+cropResultHeight)).save(pictureFileName)
