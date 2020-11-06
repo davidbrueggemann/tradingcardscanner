@@ -1,7 +1,7 @@
 import boto3
 
 def detect_text(photo, bucket="rasppicardscanner"):
-
+    cardName=""
     client=boto3.client('rekognition', region_name='eu-central-1') 
 	# with Frankfurt = eu-central-1
 
@@ -16,6 +16,6 @@ def detect_text(photo, bucket="rasppicardscanner"):
             #    print ('Parent Id: {}'.format(text['ParentId']))
             print ('Type:' + text['Type'])
             print()
-	    if text['Type'] == 'LINE':
+	    if text['Type'] == 'LINE' and text['DetectedText']:
             	cardName=text['DetectedText']
     return cardName
