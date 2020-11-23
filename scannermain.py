@@ -17,9 +17,6 @@ rightCardMovementServoPin = 2
 cardStopperServoPin = 24
 cardUploadEnabled = True  # can be deactivated by input param
 cameraEnabled = True  # can be deactivated by input param
-amountOfCards = 24  # number of cards in card pile # TODO needs to be dynamic
-cardsProcessed = 0  # iterator for cardpile
-startWheelTime = 0.55  # default wheel time
 
 ####### STARTSCREEN ########
 
@@ -75,14 +72,13 @@ setup()
 cardStopperServo = GPIO.PWM(cardStopperServoPin, 50)
 leftCardMovementServo = GPIO.PWM(leftCardMovementServoPin, 50)
 rightCardMovementServo = GPIO.PWM(rightCardMovementServoPin, 50)
+cardsProcessed = 0
 
 ####### WHEELCONTROL #########
-
-
 def wheelsStart():
     print ("Wheel CardMovementServos start")
-    leftCardMovementServo.start(15)
-    rightCardMovementServo.start(5)
+    leftCardMovementServo.start(7.5) # Default 15
+    rightCardMovementServo.start(2.5) # Default 5
 
 
 def wheelsStop():
@@ -101,14 +97,13 @@ time.sleep(1)
 
 ####### PROCESS LOOP ##########
 print ("Going into loop")
-while cardsProcessed <= amountOfCards:
-    ### CARD MOVEMENT leftCardMovementServo ####
-    wheelsStart()
-    while picture.motion() is False:
-        print ("Waiting for Motion")
-    #print "spinning Wheel for ", wheeltime," sec"
-    # time.sleep(wheeltime)
-    wheelsStop()
+while True:
+    ### CARD MOVEMENT ####
+    motionDetected = False
+    while motionDetected is False:
+        wheelsStart()
+        motionDetected=picture.motion() # check if card is in position
+        wheelsStop()
     print ("Waiting for 1 sec")
     time.sleep(1)
 
@@ -148,6 +143,7 @@ while cardsProcessed <= amountOfCards:
     cardStopperServo.ChangeDutyCycle(2.5)
     print ("Waiting for 2 sec")
     time.sleep(2)
+    print ("Cards Processed: " + str(cardsProcessed))
 
 ####### CLEANUP ##########
 GPIO.cleanup()

@@ -19,10 +19,10 @@ imageVFlip = True       # Flip image Vertically
 imageHFlip = True       # Flip image Horizontally
 
 # User Motion Detection Settings
-threshold = 7  # How Much pixel changes (default = 10)
-sensitivity = 80  # How many pixels change (default = 100)
-streamWidth = resolutionW  # motion scan stream Width
-streamHeight = resolutionH
+threshold = 1  # How Much pixel changes (default = 10)
+sensitivity = 2  # How many pixels change (default = 100) # default = 20 if using a spotlight
+streamWidth = 64  # motion scan stream Width
+streamHeight = 32
 
 ####### SETUP ##########
 
@@ -39,6 +39,7 @@ camera_setup(camera)
 
 def take():
     ### CAMERA ###
+    camera_setup(camera)
     print ("Take a picture")
     timestamp = time.strftime("%Y%m%d%H%M%S")
     picFileName = ("testfoto"+"_"+timestamp+".jpg")
@@ -62,15 +63,17 @@ def get_stream_array():
  #       camera.hflip = imageHFlip
   #      camera.exposure_mode = 'auto'
    #     camera.awb_mode = 'auto'
+        camera.resolution = (streamWidth,streamHeight)
         camera.capture(stream, format='rgb')
         return stream.array
 
 # ------------------------------------------------------------------------------
 
-def motion():
+def motion(maxChecks = 3):
     """ Loop until motion is detected """
     data1 = get_stream_array()
-    while True:
+    i = 0
+    while i < maxChecks:
         data2 = get_stream_array()
         diff_count = 0
         for y in range(0, streamHeight):
@@ -82,6 +85,7 @@ def motion():
                     diff_count += 1
                     if diff_count > sensitivity:
                         # x,y is a very rough motion position
-                        # return x, y
+                        print ("Detected Motion") # return x, y
                         return True
         data1 = data2
+    return False
