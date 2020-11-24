@@ -19,10 +19,10 @@ imageVFlip = True       # Flip image Vertically
 imageHFlip = True       # Flip image Horizontally
 
 # User Motion Detection Settings
-threshold = 1  # How Much pixel changes (default = 10)
-sensitivity = 2  # How many pixels change (default = 100) # default = 20 if using a spotlight
-streamWidth = 64  # motion scan stream Width
-streamHeight = 32
+threshold = 25  # How Much pixel changes (default = 10)
+sensitivity = 1  # How many pixels change (default = 100) # default = 20 if using a spotlight
+streamWidth = 256  # motion scan stream Width
+streamHeight = 128
 
 ####### SETUP ##########
 
@@ -35,7 +35,6 @@ def camera_setup(camera):
 
 camera = PiCamera()
 camera_setup(camera)
-
 
 def take():
     ### CAMERA ###
@@ -69,23 +68,30 @@ def get_stream_array():
 
 # ------------------------------------------------------------------------------
 
-def motion(maxChecks = 3):
-    """ Loop until motion is detected """
-    data1 = get_stream_array()
+def saveMotionComparison():
+    return get_stream_array()
+
+def motion(comparison,maxChecks = 3):
+    print ("Loop until motion is detected")
     i = 0
+    data1 = comparison
     while i < maxChecks:
         data2 = get_stream_array()
         diff_count = 0
-        for y in range(0, streamHeight):
-            for x in range(0, streamWidth):
+        for x in range(0, streamWidth):
+            for y in range(0, streamHeight):
                 # get pixel differences. Conversion to int
                 # is required to avoid unsigned short overflow.
                 diff = abs(int(data1[y][x][1]) - int(data2[y][x][1]))
                 if diff > threshold:
                     diff_count += 1
+                    print ("Threshold Difference: "+str(diff)+"  Senstivity Difference: "+str(diff_count))
                     if diff_count > sensitivity:
                         # x,y is a very rough motion position
-                        print ("Detected Motion") # return x, y
+                        # return x, y
+                        print ("Detected Motion")
+                        print ("Threshold Difference: "+str(diff)+"  Senstivity Difference: "+str(diff_count))
                         return True
+        i += 1
         data1 = data2
     return False

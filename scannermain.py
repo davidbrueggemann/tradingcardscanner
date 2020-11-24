@@ -5,18 +5,19 @@ import RPi.GPIO as GPIO
 import time
 import sys
 import getopt
+#import threading
+import concurrent.futures
 import awsupload  # own file
 import awsdetecttext  # own file
 import picture  # own file
 import textfile  # own file
-#import motiondetection  # own file
 
 ####### CONSTANTS ########
 leftCardMovementServoPin = 18
 rightCardMovementServoPin = 2
 cardStopperServoPin = 24
-cardUploadEnabled = True  # can be deactivated by input param
-cameraEnabled = True  # can be deactivated by input param
+cardUploadEnabled = False  # can be deactivated by input param
+cameraEnabled = False  # can be deactivated by input param
 
 ####### STARTSCREEN ########
 
@@ -69,22 +70,22 @@ def setup():
 startscreen()
 parameterhandling()
 setup()
-cardStopperServo = GPIO.PWM(cardStopperServoPin, 50)
-leftCardMovementServo = GPIO.PWM(leftCardMovementServoPin, 50)
-rightCardMovementServo = GPIO.PWM(rightCardMovementServoPin, 50)
+cardStopperServo = GPIO.PWM(cardStopperServoPin, 50) # Default 50 frequency in Hz
+leftCardMovementServo = GPIO.PWM(leftCardMovementServoPin, 25) # Default 50 frequency in Hz
+rightCardMovementServo = GPIO.PWM(rightCardMovementServoPin, 25) # Default 50 frequency in Hz
 cardsProcessed = 0
 
 ####### WHEELCONTROL #########
 def wheelsStart():
-    print ("Wheel CardMovementServos start")
-    leftCardMovementServo.start(7.5) # Default 15
-    rightCardMovementServo.start(2.5) # Default 5
+    print ("Wheel CardMovementServos started")
+    leftCardMovementServo.start(7.5) # Default 15 the duty cycle (0.0 <= dc <= 100.0)
+    rightCardMovementServo.start(2.5) # Default 5 the duty cycle (0.0 <= dc <= 100.0)
 
 
 def wheelsStop():
-    print ("Wheel CardMovementServo stop")
     leftCardMovementServo.start(0)
     rightCardMovementServo.start(0)
+    print ("Wheel CardMovementServo stopped")
 
 
 ####### START ##########
@@ -100,15 +101,22 @@ print ("Going into loop")
 while True:
     ### CARD MOVEMENT ####
     motionDetected = False
-    while motionDetected is False:
-        wheelsStart()
-        motionDetected=picture.motion() # check if card is in position
-        wheelsStop()
+    comparison = picture.saveMotionComparison()
+    while not motionDetected:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            motionThread = executor.submit(picture.motion, comparison)
+            time.sleep(0.02)
+            start_time = time.time()
+            wheelsStart()
+            motionDetected = motionThread.result()
+            #motionDetected=picture.motion(comparison) # check if card is in position
+            wheelsStop()
+            print ("Spinned wheels for %s milli seconds" % ((time.time() - start_time)*1000))
     print ("Waiting for 1 sec")
     time.sleep(1)
 
     # PICTURE
-    if cameraEnabled is True:
+    if cameraEnabled == True:
         picfilename = picture.take()
         picture.crop(picfilename)
         time.sleep(1)
@@ -116,7 +124,7 @@ while True:
         print ("Skipped Card capturing")
 
     # AWS
-    if cardUploadEnabled is True:
+    if cardUploadEnabled == True:
         ### UPLOAD TO AWS ###
         print ("Uploading to AWS")
         isUploaded = awsupload.upload_file(picfilename)
