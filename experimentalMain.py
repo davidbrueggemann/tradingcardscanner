@@ -58,6 +58,7 @@ def detect_text(photo, bucket="rasppicardscanner"):
             cardName = text['DetectedText']
             lineToTextfile(cardName,"Lines.txt")
 
+          
 #########################Start of Main#####################################
 
 print ("Searching for JPEGs")
