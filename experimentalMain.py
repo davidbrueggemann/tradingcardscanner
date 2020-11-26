@@ -7,6 +7,10 @@ import glob, os
 import sys
 import scrython
 
+######################## Constants #############################
+awsUploadEnabled = False
+SET_CODE = 'cmr'
+
 ######################## Functions #############################
 
 def lineToTextfile(line, filename='MagicCardList.txt'):
@@ -58,36 +62,50 @@ def detect_text(photo, bucket="rasppicardscanner"):
             cardName = text['DetectedText']
             lineToTextfile(cardName,"Lines.txt")
 
-          
+def addCard(card):
+    price = ("Price N/A" if card.prices('eur') is None else (card.prices('eur') + " EUR "))
+    print (card.name() + " | " + price)
+    lineToTextfile(card.name())
+    lineToTextfile("1x "+card.name()+" ("+SET_CODE.upper()+")","TappedoutList.txt")
+
+def requestCard(fuzzycardname,setFilter=SET_CODE):
+    try:
+        card = scrython.cards.Named(fuzzy=str(fuzzycardname),set=setFilter)
+        return card
+    except Exception:
+        return None
+
 #########################Start of Main#####################################
 
-print ("Searching for JPEGs")
-for file in glob.glob("*.jpeg"):
-    print ("Uploading" + str(file))
-    upload_file(file)
-    print ("Detecting Text")
-    detect_text(file)
+
+if awsUploadEnabled:
+    print ("Searching for JPEGs")
+    for file in glob.glob("*.jpeg"):
+        print ("Uploading" + str(file))
+        upload_file(file)
+        print ("Detecting Text")
+        detect_text(file)
 
 lastFoundCard = ""
+previousLine = "" 
+previousFound = True
+
 file = open('Lines.txt')
 for line in file:
-    try:
-        card = scrython.cards.Named(fuzzy=str(line.rstrip()))
-        if (card.set_code() == 'cmr'):
-            if (card.name() == lastFoundCard):
-                print ("--- ignored assuming unwanted duplicate of: "+card.name())
-            else:
-                if float(card.prices('eur')) > 10:
-                    print ("*** NICE HIT ***")
-                print (card.name() + " | " + card.prices('eur') + " EUR ")
-                lineToTextfile(card.name())
-                lastFoundCard = card.name()
-        else: 
-            print ("Not in commander Set: " +card.name() + " instead in Sets: ")
-            data = scrython.cards.Search(q="++{}".format(card.name()))
-            for card in data.data():
-                print ("    "+card['set'].upper(), ":", card['set_name'])
-    except Exception:
-        print ("--- Not Found by API: "+str(line.rstrip()))
-   
+    linecontent=line.rstrip()
+    card = requestCard(linecontent)
+    if card is None:
+        card = requestCard(previousLine + linecontent)
+        if card is None:
+            card = requestCard(linecontent + previousLine)
+            if card is None:
+                print ("--- Not Found by API: "+str(linecontent))
+                continue
+    if (card.set_code() == SET_CODE):
+        if (card.name() == lastFoundCard):
+            print ("--- ignored assuming unwanted duplicate of: "+card.name())
+        else:
+            addCard(card)
+            lastFoundCard = card.name()
+    previousLine = linecontent
 file.close()
