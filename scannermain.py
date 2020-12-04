@@ -81,6 +81,13 @@ def wheelsStart():
     leftCardMovementServo.start(7.5) # Default 15 the duty cycle (0.0 <= dc <= 100.0)
     rightCardMovementServo.start(2.5) # Default 5 the duty cycle (0.0 <= dc <= 100.0)
 
+wheelSpin=True
+def wheelGo():
+    while wheelSpin:
+        wheelsStart()
+        time.sleep(0.1)
+        wheelsStop()
+        time.sleep(0.1)
 
 def wheelsStop():
     leftCardMovementServo.start(0)
@@ -102,16 +109,22 @@ while True:
     ### CARD MOVEMENT ####
     motionDetected = False
     comparison = picture.saveMotionComparison()
-    while not motionDetected:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            motionThread = executor.submit(picture.motion, comparison)
-            time.sleep(0.02)
-            start_time = time.time()
-            wheelsStart()
-            motionDetected = motionThread.result()
-            #motionDetected=picture.motion(comparison) # check if card is in position
-            wheelsStop()
-            print ("Spinned wheels for %s milli seconds" % ((time.time() - start_time)*1000))
+    time.sleep(0.6)
+    wheelSpin=True
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        wheelThread = executor.submit(wheelGo)
+        while not motionDetected:
+                # wheelThread = executor.submit(wheelGo)
+                #start_time = time.time()
+                #wheelsStart()
+                motionDetected = picture.motion(comparison)
+                #motionDetected = motionThread.result()
+                #motionDetected=picture.motion(comparison) # check if card is in position
+                #wheelsStop()
+                #print ("Spinned wheels for %s milli seconds" % ((time.time() - start_time)*1000))
+        wheelSpin=False
+        wheelsStop()
+
     print ("Waiting for 1 sec")
     time.sleep(1)
 
