@@ -5,7 +5,6 @@ import RPi.GPIO as GPIO
 import time
 import sys
 import getopt
-#import threading
 import concurrent.futures
 import awsupload  # own file
 import awsdetecttext  # own file
@@ -13,11 +12,11 @@ import picture  # own file
 import textfile  # own file
 
 ####### CONSTANTS ########
-leftCardMovementServoPin = 18
-rightCardMovementServoPin = 2
+leftCardMovementServoPin = 2
+rightCardMovementServoPin = 18
 cardStopperServoPin = 24
-cardUploadEnabled = False  # can be deactivated by input param
-cameraEnabled = False  # can be deactivated by input param
+cardUploadEnabled = True #False  # can be deactivated by input param
+cameraEnabled = True #False  # can be deactivated by input param
 
 ####### STARTSCREEN ########
 
@@ -85,9 +84,9 @@ wheelSpin=True
 def wheelGo():
     while wheelSpin:
         wheelsStart()
-        time.sleep(0.1)
+        time.sleep(0.2)
         wheelsStop()
-        time.sleep(0.1)
+        time.sleep(0.8)
 
 def wheelsStop():
     leftCardMovementServo.start(0)

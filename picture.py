@@ -20,7 +20,7 @@ imageHFlip = True       # Flip image Horizontally
 
 # User Motion Detection Settings
 threshold = 25  # How Much pixel changes (default = 10)
-sensitivity = 1  # How many pixels change (default = 100) # default = 20 if using a spotlight
+sensitivity = 6  # How many pixels change (default = 100) # default = 20 if using a spotlight
 streamWidth = 256  # motion scan stream Width
 streamHeight = 128
 
@@ -62,6 +62,7 @@ def get_stream_array():
  #       camera.hflip = imageHFlip
   #      camera.exposure_mode = 'auto'
    #     camera.awb_mode = 'auto'
+        camera.rotation = 180
         camera.resolution = (streamWidth,streamHeight)
         camera.capture(stream, format='rgb')
         return stream.array
@@ -71,7 +72,7 @@ def get_stream_array():
 def saveMotionComparison():
     return get_stream_array()
 
-def motion(comparison,maxChecks = 3):
+def motion(comparison,maxChecks = 2):
     print ("Loop until motion is detected")
     i = 0
     data1 = comparison
